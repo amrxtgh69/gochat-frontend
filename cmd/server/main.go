@@ -2,14 +2,30 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-
-	"honnef.co/go/tools/config"
+	"log"
+	"net"
 )
 
 func main() {
-	fmt.Println("Start SCP chat server...")
-	cfg := config.DefaultConfig()
-	chatServer := server.NewSCPServer()
+	ln, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Server started on port :8080")
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		fmt.Println("Client Connected", conn.RemoteAddr())
+		go handleClient(conn)
+	}
 }
+
+func handleClient(conn net.Conn) {
+	defer conn.Close()
+	fmt.Println("connected to server")
+}
+
