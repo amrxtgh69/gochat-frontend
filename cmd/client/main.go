@@ -2,21 +2,17 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net"
 	"os"
+	"scp-chat/config"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run main.go <username>")
-		return
+		fmt.Println("Usage: Client <username>")
+		os.Exit(1)
 	}
+
 	username := os.Args[1]
-	conn, err := net.Dial("tcp", "localhost:8080")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(username, "connected to server")
-	conn.Close()
+	cfg := config.DefaultConfig()
+	fmt.Printf("Connecting to server at %s...\n", cfg.GetServerAddress())
 }
