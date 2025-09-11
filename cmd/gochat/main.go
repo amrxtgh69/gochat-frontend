@@ -98,7 +98,7 @@ func login() {
 func createAccount() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Print("FullName: ")
+	fmt.Print("Fullname: ")
 	scanner.Scan()
 	fullname := scanner.Text()
 
