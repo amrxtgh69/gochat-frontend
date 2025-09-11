@@ -4,103 +4,124 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"syscall"
-
-	"golang.org/x/term"
 )
 
+var currentPage string = "root"
+
 type User struct {
-	Fullname string 
-	Username string
-	Password string 
+	fullName string
+	userName string
+	password string
 }
 
-var users = make(map[string]User)
-var CurrentUser *User
+func main(){
+	for{
+		clearTerminal()
 
-func main() {
-	users["admin"] = User{Fullname: "Administrator", Username: "admin", Password: "foobar123"}
-	for {
-		fmt.Println("===gochat===")
-		fmt.Println("1. Login")
-		fmt.Println("2. Create Account")
-		fmt.Println("3. Exit")
-		fmt.Println("Choose Option")
-		
-		var choice int
-		fmt.Scanln(&choice)
-
-		switch choice {
-		case 1:
-			login()
-		case 2:
-			createAccount()
-		case 3:
-			fmt.Println("GOODBYE!!")
-			os.Exit(0)
-		default:
-			fmt.Println("Invalid option!!")
+		switch currentPage {
+		case "root":
+			renderRootPage()
+		case "create-account":
+			renderCreateAccountPage()
+		case "login":
+			renderLoginPage()
 		}
 	}
 }
 
-func login() {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("Username: ")
-	scanner.Scan()
-	username := scanner.Text()
-
-	fmt.Print("Password: ")
-	bytepassword, _ := term.ReadPassword(int(syscall.Stdin))
-	password := string(bytepassword)
-	fmt.Println()
-
-	user, exists := users[username]
-	if !exists {
-		fmt.Println("User not found!!")
-		return
-	}
-	if user.Password != password {
-		fmt.Println("Invalid password")
-		return
-	}
-	CurrentUser = &user
-	fmt.Printf("Welcome %s!\n", user.Fullname)
-	chatPrompt()
+func clearTerminal()  {
+	fmt.Print("\033[H\033[2J")
 }
 
+func renderRootPage() {
+	reader := bufio.NewScanner(os.Stdin)
 
-func createAccount() {
-	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("==========[ROOT]==========")
+	fmt.Println("")
+	fmt.Println("Login[$1]")
+	fmt.Println("Create Account[$2]")
 
-	fmt.Print("FullName: ")
-	scanner.Scan()
-	fullname := scanner.Text()
+	fmt.Print("> ")
+	reader.Scan()
 
-	fmt.Print("Username: ")
-	scanner.Scan()
-	username := scanner.Text()
-
-	fmt.Print("Password: ")
-	bytepassword, _ := term.ReadPassword(int(syscall.Stdin))
-	password := string(bytepassword)
-
-	if _, exists := users[username]; exists {
-		fmt.Println("Username already exists!!")
+	if reader.Text() == "$1" {
+		currentPage = "login"
 		return
+	} else if reader.Text() == "$2"{
+		currentPage = "create-account"
+		return
+	} else {
+		fmt.Print("Invalid option")
 	}
-	newUser := User{
-		Fullname: fullname,
-		Username: username,
-		Password: password,
-	}
-	users[username] = newUser
+}
+
+func renderCreateAccountPage()  {
+	reader := bufio.NewScanner(os.Stdin)
+	var user User
+
+	fmt.Println("==========[CREATE ACCOUNT]==========")
 	
-	fmt.Println("Account created successfully!!")
-	fmt.Printf("There are %d users in gochat", len(users))
+	fmt.Println("")
+	fmt.Println("NAVIGATE -----▶ ROOT[$1]")
+	fmt.Println("")
+	
+	fmt.Println("Full Name")
+	fmt.Print("> ")
+	reader.Scan()
+	if  reader.Text() == "$1" {
+		currentPage = "root"
+		return
+	}
+	user.fullName = reader.Text()
+
+	fmt.Println("User Name")
+	fmt.Print("> ")
+	reader.Scan()
+	if reader.Text() == "$1" {
+		currentPage = "root"
+		return
+	}
+	user.userName = reader.Text()
+
+	fmt.Println("Password")
+	fmt.Print("> ")
+	reader.Scan()
+	if reader.Text() == "$1" {
+		currentPage = "root"
+		return
+	}
+	user.password = reader.Text()
+	
+	// TODO: use net/http to send user credentials to server
 }
 
-func chatPrompt() {
-	return
+func renderLoginPage() {
+	reader := bufio.NewScanner(os.Stdin)
+	var user User
+
+	fmt.Println("==========[LOGIN]==========")
+	
+	fmt.Println("")
+	fmt.Println("NAVIGATE -----▶ ROOT[$1]")
+	fmt.Println("")
+	
+	fmt.Println("User Name")
+	fmt.Print("> ")
+	reader.Scan()
+	if  reader.Text() == "$1" {
+		currentPage = "root"
+		return
+	}
+	user.userName = reader.Text()
+
+	fmt.Println("Password")
+	fmt.Print("> ")
+	reader.Scan()
+	if reader.Text() == "$1" {
+		currentPage = "root"
+		return
+	}
+	user.password = reader.Text()
+
+	// TODO: use net/http to send user credentials to server
 }
