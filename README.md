@@ -15,11 +15,38 @@ GoChat is a simple command-line interface (CLI) based chatting application writt
 
 - [Go (Golang)](https://golang.org/)
 
+## Getting Started
+
+### Platforms
+
+This project supports the following platforms:
+
+- Linux
+- macOS
+- Windows
+
+### Requirements
+
+- Go 1.20 or higher
+
+### Installation
+
+1. **Clone the repository:**
+    ```sh
+    git clone https://github.com/amrxtgh69/gochat-frontend.git
+    cd gochat-frontend/cmd/gochat
+    ```
+
+2. **Build the project:**
+    ```sh
+    go build -o gochat
+    ```
+
+3. **Run the CLI:**
+    ```sh
+    ./gochat
+    ```
+
 ## Contributing
 
 Contributions are welcome! Please fork the repo, make changes, and submit pull requests. Open issues for bugs or feature requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
