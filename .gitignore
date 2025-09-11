@@ -39,3 +39,4 @@ Thumbs.db
 
 # Go build output
 gochat
+./cmd/gochat/gochat
