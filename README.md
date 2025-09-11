@@ -34,12 +34,12 @@ This project supports the following platforms:
 1. **Clone the repository:**
     ```sh
     git clone https://github.com/amrxtgh69/gochat-frontend.git
-    cd gochat-frontend/cmd/gochat
+    cd gochat-frontend
     ```
 
 2. **Build the project:**
     ```sh
-    go build -o gochat
+    go build -o gochat cmd/gochat/main.go
     ```
 
 3. **Run the CLI:**
