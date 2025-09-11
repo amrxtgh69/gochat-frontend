@@ -2,7 +2,7 @@
 
 ## Overview
 
-GoChat is a command-line interface (CLI) based chatting application. It allows users to connect, send, and receive messages and files through the GoChat system directly from the terminal. This project is designed for speed, simplicity, and minimal dependencies.
+GoChat is a simple command-line interface (CLI) based chatting application written in Go. It allows users to connect, send, and receive messages and files through the GoChat system directly from the terminal. This project is designed for speed, simplicity, and minimal dependencies.
 
 ## Features
 
@@ -14,18 +14,6 @@ GoChat is a command-line interface (CLI) based chatting application. It allows u
 ## Tools and Technology Used
 
 - [Go (Golang)](https://golang.org/)
-
-### Platforms
-
-This project supports the following platforms:
-
-- Linux
-- macOS
-- Windows
-
-### Requirements
-
-- Go 1.20 or higher
 
 ## Contributing
 
