@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/amritxtgh69/gochat-frontend/cmd/gochat/handlers"
+	"gochat-frontend/cmd/gochat/handlers"
 )
 
 var currentPage string = "root"
