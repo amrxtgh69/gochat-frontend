@@ -1,3 +1,3 @@
-module github.com/amritxtgh69/gochat-frontend
+module gochat-frontend
 
 go 1.25.1
