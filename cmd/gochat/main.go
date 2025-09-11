@@ -14,6 +14,32 @@ type User struct {
 	Username string
 	Password string 
 }
+//ANSI color code
+const (
+	Reset  = "\033[0m"
+	Red    = "\033[31m"
+	Green  = "\033[32m"
+	Yellow = "\033[33m"
+	Blue   = "\033[34m"
+	Cyan   = "\033[36m"
+)
+
+func clearScreen() {
+	fmt.Print("\033[2J\033[H")
+}
+func printVisual()  {
+	fmt.Println(Cyan + "┌──────────────────────────────┐" + Reset)
+	fmt.Println(Cyan + "│          🌐 GoChat CLI       │" + Reset)
+	fmt.Println(Cyan + "└──────────────────────────────┘" + Reset)	
+}
+
+func printMenu() {
+	fmt.Println(Green + "[1] Login" + Reset)
+	fmt.Println(Green + "[2] Create Account" + Reset)
+	fmt.Println(Green + "[3] Exit" + Reset)
+	fmt.Print(Yellow + "Choose Option: " + Reset)
+}
+
 
 var users = make(map[string]User)
 var CurrentUser *User
@@ -21,11 +47,9 @@ var CurrentUser *User
 func main() {
 	users["admin"] = User{Fullname: "Administrator", Username: "admin", Password: "foobar123"}
 	for {
-		fmt.Println("===gochat===")
-		fmt.Println("1. Login")
-		fmt.Println("2. Create Account")
-		fmt.Println("3. Exit")
-		fmt.Println("Choose Option")
+		clearScreen()
+		printVisual()
+		printMenu()
 		
 		var choice int
 		fmt.Scanln(&choice)
