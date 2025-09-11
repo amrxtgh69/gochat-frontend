@@ -37,5 +37,5 @@ Thumbs.db
 *.tmp
 *.temp
 
-#Go build output
-/gochat
+# Go build output
+gochat
