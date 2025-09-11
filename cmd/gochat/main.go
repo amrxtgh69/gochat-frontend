@@ -14,6 +14,10 @@ type User struct {
 	Username string
 	Password string 
 }
+
+var users = make(map[string]User)
+var CurrentUser *User
+
 //ANSI color code
 const (
 	Reset  = "\033[0m"
@@ -39,10 +43,6 @@ func printMenu() {
 	fmt.Println(Green + "[3] Exit" + Reset)
 	fmt.Print(Yellow + "Choose Option: " + Reset)
 }
-
-
-var users = make(map[string]User)
-var CurrentUser *User
 
 func main() {
 	users["admin"] = User{Fullname: "Administrator", Username: "admin", Password: "foobar123"}
