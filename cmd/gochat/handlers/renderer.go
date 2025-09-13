@@ -6,24 +6,32 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"io"
 	"time"
 )
 
 type User struct {
-	fullName string
-	userName string
-	password string
+	FullName string
+	UserName string
+	Password string
 }
+
+var ANSI_GREEN string = "\033[1;30;42m" // bold black text with green bg
+var ANSI_RED string = "\033[1;41m" // bold text with red bg
+var ANSI_RESET string = "\033[0m"
 
 func RenderRootPage(currentPage *string) {
 	reader := bufio.NewScanner(os.Stdin)
 
-	fmt.Println("==========[ROOT]==========")
+	fmt.Println(
+		" ==========[ROOT]===========\n",
+		"| Go to Login[$1]\n",
+		"| Go to Create Account[$2]\n",
+		"===========================",
+		)
 	fmt.Println("")
-	fmt.Println("Login[$1]")
-	fmt.Println("Create Account[$2]")
-
-	fmt.Print("> ")
+	
+	fmt.Print(">>> ")
 	reader.Scan()
 
 	if reader.Text() == "$1" {
@@ -37,57 +45,62 @@ func RenderRootPage(currentPage *string) {
 	}
 }
 
-func RenderCreateAccountPage(currentPage *string)  {
+func RenderCreateAccountPage(currentPage *string) {
 	reader := bufio.NewScanner(os.Stdin)
 	var user User
 
-	fmt.Println("==========[CREATE ACCOUNT]==========")
-	
+	fmt.Println(
+		" =====[Create Account]=====\n",
+		"| Go to Root[$1]\n",
+		"==========================",
+	)
 	fmt.Println("")
-	fmt.Println("NAVIGATE -----▶ ROOT[$1]")
-	fmt.Println("")
-	
+
 	fmt.Println("Full Name")
-	fmt.Print("> ")
+	fmt.Print(">>> ")
 	reader.Scan()
-	if  reader.Text() == "$1" {
+	if reader.Text() == "$1" {
 		*currentPage = "root"
 		return
 	}
-	user.fullName = reader.Text()
+	user.FullName = reader.Text()
 
 	fmt.Println("User Name")
-	fmt.Print("> ")
+	fmt.Print(">>> ")
 	reader.Scan()
 	if reader.Text() == "$1" {
 		*currentPage = "root"
 		return
 	}
-	user.userName = reader.Text()
+	user.UserName = reader.Text()
 
 	fmt.Println("Password")
-	fmt.Print("> ")
+	fmt.Print(">>> ")
 	reader.Scan()
 	if reader.Text() == "$1" {
 		*currentPage = "root"
 		return
 	}
-	user.password = reader.Text()
+	user.Password = reader.Text()
 
-	data := fmt.Sprintf("{\"fullName\": \"%s\", \"userName\": \"%s\", \"password\": \"%s\"}", user.fullName, user.userName, user.password)
-	resp, err := http.Post("http://127.0.0.1/create-account", "application/json", strings.NewReader(data))
+	data := fmt.Sprintf(`{"fullName":"%s","userName":"%s","password":"%s"}`, user.FullName, user.UserName, user.Password)
+	resp, err := http.Post("http://127.0.0.1:8080/create-account", "application/json", strings.NewReader(data))
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == 400 {
-		println("Err:", resp.Body, ", refressing the page in 3 second.")
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	body := strings.TrimSpace(string(bodyBytes))
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		fmt.Println(ANSI_RED, "Err:", body, ", refreshing in 3 seconds...", ANSI_RESET)
 		time.Sleep(3 * time.Second)
-		return;
+		return
 	}
 
 	*currentPage = "login"
-	println("Success:", resp.Body, ", redirecting to the login page in 3 second.")
+	fmt.Println(ANSI_GREEN, "Success:", body, ", redirecting to login in 3 seconds...", ANSI_RESET)
 	time.Sleep(3 * time.Second)
 }
 
@@ -95,29 +108,103 @@ func RenderLoginPage(currentPage *string) {
 	reader := bufio.NewScanner(os.Stdin)
 	var user User
 
-	fmt.Println("==========[LOGIN]==========")
-	
+	fmt.Println(
+		" =========[Login]==========\n",
+		"| Go to Root[$1]\n",
+		"| Forgot Password[$2]\n",
+		"==========================",
+	)
 	fmt.Println("")
-	fmt.Println("NAVIGATE -----▶ ROOT[$1]")
-	fmt.Println("")
-	
-	fmt.Println("User Name")
-	fmt.Print("> ")
-	reader.Scan()
-	if  reader.Text() == "$1" {
-		*currentPage = "root"
-		return
-	}
-	user.userName = reader.Text()
 
-	fmt.Println("Password")
-	fmt.Print("> ")
+	fmt.Println("User Name")
+	fmt.Print(">>> ")
 	reader.Scan()
 	if reader.Text() == "$1" {
 		*currentPage = "root"
 		return
 	}
-	user.password = reader.Text()
+	user.UserName = reader.Text()
 
-	// TODO: use net/http to send user credentials to server
+	fmt.Println("Password")
+	fmt.Print(">>> ")
+	reader.Scan()
+	if reader.Text() == "$1" {
+		*currentPage = "root"
+		return
+	}
+	user.Password = reader.Text()
+
+	data := fmt.Sprintf(`{"userName":"%s","password":"%s"}`, user.UserName, user.Password)
+	resp, err := http.Post("http://127.0.0.1:8080/login", "application/json", strings.NewReader(data))
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	body := strings.TrimSpace(string(bodyBytes))
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		fmt.Println(ANSI_RED, "Err:", body, ", refreshing in 3 seconds...", ANSI_RESET)
+		time.Sleep(3 * time.Second)
+		return
+	}
+
+	*currentPage = "users"
+	fmt.Println(ANSI_GREEN, "Success:", body, ", redirecting to home page in 3 seconds...", ANSI_RESET)
+	time.Sleep(3 * time.Second)
+}
+
+
+func RenderUsersPage(currentPage *string) {
+	reader := bufio.NewScanner(os.Stdin)
+
+	fmt.Println(
+		" =========[Users]==========\n",
+		"| Create Group[$1]\n",
+		"| Logout[$2]\n",
+		"==========================",
+		)
+	fmt.Println(
+		" ==========================\n",
+		"| bokshi[$3]\n",
+		"| amrxtgh[$4]\n",
+		"==========================",
+		)
+	fmt.Println("")
+	
+	fmt.Print(">>> ")
+	reader.Scan()
+	if  reader.Text() == "$3" {
+		*currentPage = "chat"
+		return
+	}
+}
+
+func RenderChatPage(currentPage *string) {
+	reader := bufio.NewScanner(os.Stdin)
+
+	fmt.Println(
+		" =========[Chat]====================\n",
+		"| Go to Users[$1]\n",
+		"| Send File[$2]\n",
+		"====================================",
+		)
+	fmt.Println(
+		" ====================================\n",
+		"| Currently chatting with bokshi\n",
+		"====================================\n",
+		"| You: Hello\n",
+		"| Bokshi: Hi, Bokshi\n",
+		"====================================",
+		)
+
+	fmt.Println("")
+	
+	fmt.Print(">>> ")
+	reader.Scan()
+	if  reader.Text() == "$1" {
+		*currentPage = "users"
+		return
+	}
 }

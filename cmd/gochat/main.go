@@ -17,6 +17,11 @@ func main(){
 			handlers.RenderCreateAccountPage(&currentPage)
 		case "login":
 			handlers.RenderLoginPage(&currentPage)
+		case "users":
+			handlers.RenderUsersPage(&currentPage)
+		case "chat":
+			handlers.RenderChatPage(&currentPage)
+
 		}
 	}
 }
