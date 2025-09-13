@@ -3,7 +3,10 @@ package handlers
 import (
 	"bufio"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
+	"time"
 )
 
 type User struct {
@@ -70,8 +73,22 @@ func RenderCreateAccountPage(currentPage *string)  {
 		return
 	}
 	user.password = reader.Text()
-	
-	// TODO: use net/http to send user credentials to server
+
+	data := fmt.Sprintf("{\"fullName\": \"%s\", \"userName\": \"%s\", \"password\": \"%s\"}", user.fullName, user.userName, user.password)
+	resp, err := http.Post("http://127.0.0.1/create-account", "application/json", strings.NewReader(data))
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == 400 {
+		println("Err:", resp.Body, ", refressing the page in 3 second.")
+		time.Sleep(3 * time.Second)
+		return;
+	}
+
+	*currentPage = "login"
+	println("Success:", resp.Body, ", redirecting to the login page in 3 second.")
+	time.Sleep(3 * time.Second)
 }
 
 func RenderLoginPage(currentPage *string) {
