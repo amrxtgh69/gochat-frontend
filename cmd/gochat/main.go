@@ -4,7 +4,7 @@ import (
 	"gochat-frontend/cmd/gochat/handlers"
 )
 
-var currentPage string = "root"
+var currentPage string = "users"
 
 func main(){
 	for{
