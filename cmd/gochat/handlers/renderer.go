@@ -233,7 +233,7 @@ func RenderUsersPage(currentPage *string, serverIP string) {
         return
     } else {
         // map input to correct user index
-        for i, user := range users {
+        for i, user := range filteredUsers {
             if input == fmt.Sprintf("$%d", i+3) {
 				*currentPage = "chat"
 				fmt.Println("Now chatting with", user.UserName)
@@ -305,5 +305,7 @@ func RenderChatPage(currentPage *string, serverIP string) {
 		} else {
 			resp2.Body.Close()
 		}
+
+		fmt.Print("\033[H\033[2J")
 	}
 }
