@@ -273,7 +273,7 @@ func RenderChatPage(currentPage *string, serverIP string) {
 		fmt.Println("=========[Chat]=========")
 		fmt.Println("| Go to Users[$1]")
 		fmt.Println("========================")
-		fmt.Printf("| Currently chatting with %s\n", m.Sender)
+		fmt.Printf("| Currently chatting with %s\n", receiver)
 		fmt.Println("========================")
 		for _, m := range msgs {
 			if m.Sender == currentUser {
