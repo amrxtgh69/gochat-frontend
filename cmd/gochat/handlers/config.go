@@ -71,10 +71,23 @@ func setRCValue(key, value string) error {
 }
 
 // get a key
-func getRCValue(key string) (string, error) {
+func GetRCValue(key string) (string, error) {
 	data, err := readRCFile()
 	if err != nil {
 		return "", err
 	}
 	return data[key], nil
+}
+
+// delete a key
+func deleteRCValue(key string) error {
+	data, err := readRCFile()
+	if err != nil {
+		return err
+	}
+	if _, exists := data[key]; exists {
+		delete(data, key)
+		return writeRCFile(data)
+	}
+	return nil // key doesn't exist, nothing to do
 }

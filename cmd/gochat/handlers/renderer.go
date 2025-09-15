@@ -53,7 +53,7 @@ func RenderRootPage(currentPage *string) {
 	}
 }
 
-func RenderCreateAccountPage(currentPage *string) {
+func RenderCreateAccountPage(currentPage *string, serverIP string) {
 	reader := bufio.NewScanner(os.Stdin)
 	var user User
 
@@ -92,7 +92,8 @@ func RenderCreateAccountPage(currentPage *string) {
 	user.Password = reader.Text()
 
 	data := fmt.Sprintf(`{"fullName":"%s","userName":"%s","password":"%s"}`, user.FullName, user.UserName, user.Password)
-	resp, err := http.Post("http://127.0.0.1:8080/create-account", "application/json", strings.NewReader(data))
+	url := fmt.Sprintf(`http://%s/create-account`, serverIP)
+	resp, err := http.Post(url, "application/json", strings.NewReader(data))
 	if err != nil {
 		panic(err)
 	}
@@ -112,7 +113,7 @@ func RenderCreateAccountPage(currentPage *string) {
 	time.Sleep(3 * time.Second)
 }
 
-func RenderLoginPage(currentPage *string) {
+func RenderLoginPage(currentPage *string, serverIP string) {
 	reader := bufio.NewScanner(os.Stdin)
 	var user User
 
@@ -143,7 +144,8 @@ func RenderLoginPage(currentPage *string) {
 	user.Password = reader.Text()
 
 	data := fmt.Sprintf(`{"userName":"%s","password":"%s"}`, user.UserName, user.Password)
-	resp, err := http.Post("http://127.0.0.1:8080/login", "application/json", strings.NewReader(data))
+	url := fmt.Sprintf(`http://%s/login`, serverIP)
+	resp, err := http.Post(url, "application/json", strings.NewReader(data))
 	if err != nil {
 		panic(err)
 	}
@@ -160,20 +162,21 @@ func RenderLoginPage(currentPage *string) {
 
 	*currentPage = "users"
 	setRCValue("USERNAME", user.UserName) // save username to .gochatrc
-	fmt.Println(ANSI_GREEN, "Success:", body, ", redirecting to home page in 3 seconds...", ANSI_RESET)
+	fmt.Println(ANSI_GREEN, "Success:", body, ", redirecting to users page in 3 seconds...", ANSI_RESET)
 	time.Sleep(3 * time.Second)
 }
 
-func RenderUsersPage(currentPage *string) {
-	username, _ := getRCValue("USERNAME")
-	if username == "" {
+func RenderUsersPage(currentPage *string, serverIP string) {
+	currentUserName, _ := GetRCValue("USERNAME")
+	if currentUserName == "" {
 		*currentPage = "root" // no saved user
 		return
 	} else {
 		*currentPage = "users" // auto-login
 	}
 
-    resp, err := http.Get("http://127.0.0.1:8080/users")
+	url := fmt.Sprintf(`http://%s/users`, serverIP)
+    resp, err := http.Get(url)
     if err != nil {
         fmt.Println("Error fetching users:", err)
         time.Sleep(2 * time.Second)
@@ -188,6 +191,19 @@ func RenderUsersPage(currentPage *string) {
         return
     }
 
+	var filteredUsers []User
+	for _, u := range users {
+		if u.UserName != currentUserName {
+			filteredUsers = append(filteredUsers, u)
+		}
+	}
+
+	if len(filteredUsers) == 0 {
+		fmt.Println("No other users available to chat.")
+		time.Sleep(2 * time.Second)
+		return
+	}
+
     reader := bufio.NewScanner(os.Stdin)
 
     fmt.Println(" =========[Users]==========")
@@ -196,7 +212,7 @@ func RenderUsersPage(currentPage *string) {
     fmt.Println("==========================")
 
     // Dynamically list users with numbers $3, $4, $5 ...
-    for i, user := range users {
+    for i, user := range filteredUsers {
         fmt.Printf("| %s[$%d]\n", user.UserName, i+3)
     }
     fmt.Println("==========================")
@@ -210,7 +226,10 @@ func RenderUsersPage(currentPage *string) {
         // create group handler
 		return
     } else if input == "$2" {
-        *currentPage = "root"
+		deleteRCValue("USERNAME")
+		*currentPage = "root"
+		fmt.Println(ANSI_GREEN, "LOGGING OUT, redirecting to root page in 3 seconds...", ANSI_RESET)
+		time.Sleep(3 * time.Second)
         return
     } else {
         // map input to correct user index
@@ -225,11 +244,11 @@ func RenderUsersPage(currentPage *string) {
     }
 }
 
-func RenderChatPage(currentPage *string) {
+func RenderChatPage(currentPage *string, serverIP string) {
 	reader := bufio.NewScanner(os.Stdin)
 	
-	currentUser, _ := getRCValue("USERNAME")
-	receiver, _ := getRCValue("RECEIVERUSERNAME")
+	currentUser, _ := GetRCValue("USERNAME")
+	receiver, _ := GetRCValue("RECEIVERUSERNAME")
 	if receiver == "" {
 		fmt.Println("No receiver selected!")
 		*currentPage = "users"
@@ -238,7 +257,7 @@ func RenderChatPage(currentPage *string) {
 
 	for {
 		// Fetch messages from backend
-		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/get-messages?sender=%s&receiver=%s", currentUser, receiver))
+		resp, err := http.Get(fmt.Sprintf("http://%s/get-messages?sender=%s&receiver=%s", serverIP, currentUser, receiver))
 		if err != nil {
 			fmt.Println("Error fetching messages:", err)
 			time.Sleep(2 * time.Second)
@@ -278,7 +297,8 @@ func RenderChatPage(currentPage *string) {
 		// Send to backend
 		msg := Message{Sender: currentUser, Receiver: receiver, Content: text}
 		data, _ := json.Marshal(msg)
-		resp2, err := http.Post("http://127.0.0.1:8080/send-message", "application/json", strings.NewReader(string(data)))
+		url := fmt.Sprintf(`http://%s/send-message`, serverIP)
+		resp2, err := http.Post(url, "application/json", strings.NewReader(string(data)))
 		if err != nil {
 			fmt.Println("Error sending message:", err)
 			time.Sleep(2 * time.Second)
